@@ -81,6 +81,8 @@ export class FlightEditComponent implements OnInit {
     );
 
     this.editForm.valueChanges.subscribe(console.log);
+
+    setTimeout(() => this.editForm.controls.address.errors, 5_000);
   }
 
   save(): void {

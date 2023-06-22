@@ -1,10 +1,19 @@
-import { Component, DoCheck, inject } from '@angular/core';
 import {
+  AfterViewInit,
+  Component,
+  DoCheck,
+  OnInit,
+  inject,
+} from '@angular/core';
+import {
+  AbstractControl,
   ControlValueAccessor,
   FormControl,
   NgControl,
   NonNullableFormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
+  Validator,
 } from '@angular/forms';
 
 export interface Address {
@@ -59,7 +68,9 @@ export interface ExternalAddress extends Address {
   `,
 })
 // eslint-disable-next-line @angular-eslint/component-class-suffix
-export class AddressControl implements ControlValueAccessor, DoCheck {
+export class AddressControl
+  implements ControlValueAccessor, Validator, DoCheck, OnInit
+{
   addressForm = inject(NonNullableFormBuilder).group({
     street: [''],
     number: [''],
@@ -74,6 +85,19 @@ export class AddressControl implements ControlValueAccessor, DoCheck {
 
   constructor() {
     this.#ngControl.valueAccessor = this;
+    this.addressForm.valueChanges.subscribe(() => this.updateAddress());
+  }
+
+  ngOnInit(): void {
+    this.#ngControl.control?.addValidators(this.validate.bind(this));
+  }
+
+  validate(control: AbstractControl<Address>): ValidationErrors | null {
+    return 'austria'.includes(control.value.country.toLowerCase())
+      ? {
+          address: true,
+        }
+      : null;
   }
 
   ngDoCheck(): void {

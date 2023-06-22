@@ -1,11 +1,18 @@
 import { NgIf } from '@angular/common';
-import { Component, inject, Input, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnInit,
+} from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   FormGroupDirective,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 
 type PersonForm = FormGroup<{
@@ -37,6 +44,8 @@ type PersonForm = FormGroup<{
 export class PersonSubformComponent implements OnInit {
   @Input() formGroupName = '';
 
+  cd = inject(ChangeDetectorRef);
+
   #formBuilder = inject(FormBuilder);
   #parentForm = inject(FormGroupDirective, { optional: true });
   personForm!: PersonForm;
@@ -47,12 +56,22 @@ export class PersonSubformComponent implements OnInit {
       this.#formBuilder.group({});
     this.personForm.addControl(
       'firstname',
-      new FormControl('', { nonNullable: true })
+      new FormControl('', {
+        nonNullable: true /* validators: Validators.required  */,
+      })
     );
     this.personForm.addControl(
       'lastname',
       new FormControl('', { nonNullable: true })
     );
+    /* queueMicrotask(() => {
+      this.personForm.controls.firstname.addValidators(Validators.required);
+      this.personForm.controls.firstname.updateValueAndValidity();
+    }); */
+    this.personForm.controls.firstname.addValidators(Validators.required);
+    this.personForm.controls.firstname.updateValueAndValidity();
+    // this.personForm.controls.firstname.addValidators(Validators.required);
+    // this.cd.detectChanges();
   }
 
   logValue(): void {
